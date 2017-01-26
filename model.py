@@ -198,6 +198,10 @@ class PieceModelEntity(ModelEntity):
 		super(PieceModelEntity, self).__init__()
 		self.row = None
 		self.col = None
+		self.custom_color = None
+		self.custom_position = None
+		self.custom_rotation = None
+		self.custom_scale = None
 
 
 class EntityCreator(object):
@@ -323,13 +327,14 @@ class EntityCreator(object):
 		e.player = player  # dynamically assign this model to one player
 
 		e.custom_color = e.select_color.copy()
-		e.custom_position = e.position.copy()
+		e.custom_position = np.zeros((3,))
 		e.custom_position[1] = PIECE_SELECTION_Y_VALUE
 		e.custom_rotation = e.rotation.copy()
 		if e.player == PLAYER_BLACK:
 			angle = 45.0
 		elif e.player == PLAYER_WHITE:
 			angle = -45.0
+
 		e.custom_rotation[0] = angle
 		e.custom_scale = PIECE_SELECTION_SCALE.copy()
 		return e

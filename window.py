@@ -87,7 +87,7 @@ class View(QQuickView):
 		self._renderer.reset_board()
 		self._game.reset_board()
 
-	# Receive signals from QML
+	# SLots for signals from QML
 	@pyqtSlot(float, float, float)
 	def onScaleChanged (self, x, y, z):
 		self._renderer.on_scale_changed(x, y, z)

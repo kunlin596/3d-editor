@@ -12,7 +12,6 @@ from utils import *
 
 
 class SceneRenderer(QObject):
-
 	def __init__ (self, window = None, camera = None, parent = None):
 		super(SceneRenderer, self).__init__(parent)
 		self._window = window
@@ -156,7 +155,7 @@ class SceneRenderer(QObject):
 					e.position[1] = -0.25
 
 	def prepare_pieces (self, board_table):
-
+		# Change the current entities table in the renderer using the board_table
 		for row in range(8):
 			for col in range(8):
 				if board_table[row][col].status == TILE_EMPTY:
@@ -166,7 +165,6 @@ class SceneRenderer(QObject):
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
 					if e is not None:
-
 						if self._selected != board_table.selected:
 							self.change_current_selection(e)
 						else:
@@ -174,14 +172,13 @@ class SceneRenderer(QObject):
 							                                     self._window.on_selection_color_changed)
 							SceneRenderer._ChangeCustomAttribPtr(e.custom_postion, self._custom_position_ptr,
 							                                     self._window.on_selection_position_changed)
-							SceneRenderer._ChangeCustomAttribPtr(e.custom.rotation, self._custom_rotation_ptr,
+							SceneRenderer._ChangeCustomAttribPtr(e.custom_rotation, self._custom_rotation_ptr,
 							                                     self._window.on_selection_rotation_changed)
-							SceneRenderer._ChangeCustomAttribPtr(e.custom.scale, self._custom_scale_ptr,
+							SceneRenderer._ChangeCustomAttribPtr(e.custom_scale, self._custom_scale_ptr,
 							                                     self._window.on_selection_scale_changed)
 
 						self.animate_select_piece(e)
 						self._title_entities[col + 8 * row].color = TILE_SELECTED_COLOR.copy()
-					# self.animate_selected_piece(e)
 
 				elif board_table[row][col].status == TILE_DESTINATION:
 					start_r, start_c = board_table.selected
@@ -232,8 +229,11 @@ class SceneRenderer(QObject):
 		a1 = QPropertyAnimation(e, str.encode('_position'))
 		a1.setDuration(50)
 		a1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+
 		a1.setEndValue(
-			QVector3D(e.custom_position[0], e.custom_position[1], e.custom_position[2]))
+			QVector3D(e.custom_position[0] + e.original_position[0],
+			          e.custom_position[1] + e.original_position[1],
+			          e.custom_position[2] + e.original_position[2]))
 
 		a2 = QPropertyAnimation(e, str.encode('_scale'))
 		a2.setDuration(50)
@@ -241,16 +241,10 @@ class SceneRenderer(QObject):
 		a2.setEndValue(
 			QVector3D(e.custom_scale[0], e.custom_scale[1], e.custom_scale[2]))
 
-		if e.player == PLAYER_BLACK:
-			angle = 45.0
-		elif e.player == PLAYER_WHITE:
-			angle = -45.0
-
 		a3 = QPropertyAnimation(e, str.encode('_rotation'))
 		a3.setDuration(100)
 		a3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
-		a3.setEndValue(
-			QVector3D(e.custom_rotation[0], e.custom_rotation[1], e.custom_rotation[2]))
+		a3.setEndValue(QVector3D(e.custom_rotation[0], e.custom_rotation[1], e.custom_rotation[2]))
 
 		a4 = QPropertyAnimation(e, str.encode('_color'))
 		a4.setDuration(100)
@@ -507,7 +501,7 @@ class SceneRenderer(QObject):
 		:param change_func:
 		:return:
 		"""
-		if not (attrib == buf).all():
+		if (attrib != buf).any():
 			attrib = buf.copy()
 			change_func(attrib[0],
 			            attrib[1],
